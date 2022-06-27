@@ -2,19 +2,32 @@ import { Chat, MoreVert, Search } from "@mui/icons-material";
 import { Avatar, Button, IconButton } from "@mui/material";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
+import { auth, db } from "../firebase";
+import { addDoc, collection } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Sidebar() {
-  const createChat = () => {
+  const [user] = useAuthState(auth);
+  const createChat = async () => {
     const input = prompt("Please enter an email address");
     if (!input) return null;
     if (EmailValidator.validate(input)) {
-      // we need to add the chat to the db
+      console.log("hello");
+      try {
+        const docRef = await addDoc(collection(db, "chat"), {
+          users: [user.email, input],
+        });
+        console.log("User added ", docRef.id);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
     }
   };
+
   return (
     <Container>
       <Header>
-        <UserAvatar />
+        <UserAvatar onClick={() => auth.signOut()} />
         <IconsContainer>
           <IconButton>
             <Chat />

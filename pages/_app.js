@@ -9,11 +9,10 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 function MyApp({ Component, pageProps }) {
   const [user, loading] = useAuthState(auth);
 
-  useEffect(() => {
+  const addAuthUser = async () => {
     if (user) {
-      console.log(user);
       try {
-        const docRef = addDoc(
+        const docRef = await addDoc(
           collection(db, "users"),
           {
             email: user.email,
@@ -27,7 +26,10 @@ function MyApp({ Component, pageProps }) {
         console.error("Error adding document: ", e);
       }
     }
-  }, [user]);
+  };
+  useEffect(() => {
+    addAuthUser();
+  }, []);
 
   if (loading) return <Loading />;
 

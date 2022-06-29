@@ -3,16 +3,32 @@ import { Avatar, Button, IconButton } from "@mui/material";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
 import { auth, db } from "../firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, query, where } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
 
 export default function Sidebar() {
   const [user] = useAuthState(auth);
+  const usersRef = collection(db, "chat");
+  const q = query(usersRef, where("chat", "array-contains", "user.email"));
+
+  const getChat = async () => {
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, " => ", doc.data());
+    });
+  };
+
+  getChat();
+
+  const [chatSnapshot] = useCollection(userChatRef);
+
   const createChat = async () => {
     const input = prompt("Please enter an email address");
     if (!input) return null;
-    if (EmailValidator.validate(input)) {
-      console.log("hello");
+
+    if (EmailValidator.validate(input) && !chatAlreadyExists(input) && input !== user.email) {
       try {
         const docRef = await addDoc(collection(db, "chat"), {
           users: [user.email, input],
@@ -23,6 +39,7 @@ export default function Sidebar() {
       }
     }
   };
+  const chatAlreadyExists = (recipentEmail) => !!chatSnapshot?.docs.find((chat) => chat.data().users.find((user) => user === recipentEmail)?.length > 0);
 
   return (
     <Container>

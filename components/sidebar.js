@@ -3,36 +3,45 @@ import { Avatar, Button, IconButton } from "@mui/material";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
 import { auth, db } from "../firebase";
-import { addDoc, collection, getDocs, where } from "firebase/firestore";
+import { addDoc, collection, query, where } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
+import Chats from "./Chats";
 
 export default function Sidebar() {
   const [user] = useAuthState(auth);
 
+  const chatUserRef = query(
+    collection(db, "chat"),
+    where("users", "array-contains", user.email)
+  );
+
+  const [chatSnapshot] = useCollection(chatUserRef);
+
+  const chatAlreadyExists = (recipientEmail) =>
+    !!chatSnapshot?.docs.find(
+      (chat) =>
+        chat.data().users.find((user) => user === recipientEmail)?.length > 0
+    );
+
   const createChat = async () => {
     const input = prompt("Please enter an email address");
     if (!input) return null;
-    if (await chatAlreadyExists(input)) {
-      if (EmailValidator.validate(input) && input !== user.email) {
-        try {
-          const docRef = await addDoc(collection(db, "chat"), {
-            users: [user.email, input],
-          });
-          console.log("User added ", docRef.id);
-        } catch (e) {
-          console.error("Error adding document: ", e);
-        }
+
+    if (
+      EmailValidator.validate(input) &&
+      !chatAlreadyExists(input) &&
+      input !== user.email
+    ) {
+      try {
+        const docRef = await addDoc(collection(db, "chat"), {
+          users: [user.email, input],
+        });
+        console.log("User added ", docRef.id);
+      } catch (e) {
+        console.error("Error adding document: ", e);
       }
     }
-  };
-  const chatAlreadyExists = async (recipientEmail) => {
-    const chatUsers = [];
-    const querySnapshot = await getDocs(collection(db, "chat"), where("users", "array-contains", user.email));
-    querySnapshot.forEach((doc) => {
-      chatUsers.push(doc.data().users[1]);
-    });
-
-    return !chatUsers.includes(recipientEmail);
   };
 
   return (
@@ -51,8 +60,9 @@ export default function Sidebar() {
         <SearchInput placeholder="Search in chats" />
       </Searchdiv>
       <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
-
-      {/* List of chats */}
+      {chatSnapshot?.docs.map((chat) => (
+        <Chats key={chat.id} id={chat.id} users={chat.data().users} />
+      ))}
     </Container>
   );
 }

@@ -1,4 +1,4 @@
-import { Chat, MoreVert, Search } from "@mui/icons-material";
+import { Chat, MoreVert } from "@mui/icons-material";
 import { Avatar, Button, IconButton } from "@mui/material";
 import styled from "styled-components";
 import * as EmailValidator from "email-validator";
@@ -7,6 +7,7 @@ import { addDoc, collection, query, where } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import Chats from "./Chats";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function Sidebar() {
   const [user] = useAuthState(auth);
@@ -55,10 +56,11 @@ export default function Sidebar() {
           <MoreVert />
         </IconsContainer>
       </Header>
-      <Searchdiv>
-        <Search />
-        <SearchInput placeholder="Search in chats" />
-      </Searchdiv>
+      <Search>
+        <SearchIcon />
+        <SearchInput placeholder="Search in Chats" />
+      </Search>
+
       <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
       {chatSnapshot?.docs.map((chat) => (
         <Chats key={chat.id} id={chat.id} users={chat.data().users} />
@@ -67,22 +69,42 @@ export default function Sidebar() {
   );
 }
 
-const Container = styled.div``;
-const SidebarButton = styled(Button)`
-  width: 100%;
-  border-top: 1px solid whitesmoke;
-  border-bottom: 1px solid whitesmoke;
+const Container = styled.div`
+  flex: 0.45;
+  border-right: 1px solid whitesmoke;
+  height: 100vh;
+  min-width: 300px;
+  max-width: 350px;
+  overflow-y: scroll;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
-const SearchInput = styled.input`
-  outline: none;
-  border: none;
-  flex: 1;
-`;
-const Searchdiv = styled.div`
+
+const Search = styled.div`
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 5px;
   border-radius: 2px;
+`;
+
+const SidebarButton = styled(Button)`
+  width: 100%;
+
+  &&& {
+    border-top: 1px solid whitesmoke;
+    border-bottom: 1px solid whitesmoke;
+    color: black;
+  }
+`;
+
+const SearchInput = styled.input`
+  outline-width: 0;
+  border: none;
+  flex: 1;
 `;
 
 const Header = styled.div`
@@ -104,4 +126,8 @@ const UserAvatar = styled(Avatar)`
   }
 `;
 
-const IconsContainer = styled.div``;
+const IconsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

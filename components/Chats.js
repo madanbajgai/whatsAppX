@@ -4,17 +4,17 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import { auth, db } from "../firebase";
-import getRecipentEmail from "../utils/getRecipentEmail";
+import getRecipientEmail from "../utils/getRecipientEmail";
 import { useRouter } from "next/router";
 
 const Chats = ({ id, users }) => {
   const router = useRouter();
   const [user] = useAuthState(auth);
-  const recipientEmail = getRecipentEmail(users, user);
+  const recipientEmail = getRecipientEmail(users, user);
 
   const chatUserRef = query(
     collection(db, "users"),
-    where("email", "==", getRecipentEmail(users, user))
+    where("email", "==", getRecipientEmail(users, user))
   );
   const [recipientSnapshot] = useCollection(chatUserRef);
 

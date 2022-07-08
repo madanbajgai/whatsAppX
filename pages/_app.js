@@ -4,7 +4,12 @@ import { auth, db } from "../firebase";
 import Login from "../components/login";
 import { Loading } from "../components/Loading";
 import { useEffect } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
 
 function MyApp({ Component, pageProps }) {
   const [user, loading] = useAuthState(auth);
@@ -12,7 +17,7 @@ function MyApp({ Component, pageProps }) {
   const addAuthUser = async () => {
     if (user) {
       try {
-        const docRef = await addDoc(
+        const docRef = await setDoc(
           collection(db, "users"),
           {
             email: user.email,

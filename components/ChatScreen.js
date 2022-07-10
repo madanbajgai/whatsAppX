@@ -93,7 +93,7 @@ const ChatScreen = ({ chat, messages }) => {
   return (
     <Container>
       <Header>
-        <Avatar src={recipient.photoURL} />
+        <Avatar src={recipient?.photoURL} />
 
         <HeaderInformation>
           <h3>{recipientEmail}</h3>
